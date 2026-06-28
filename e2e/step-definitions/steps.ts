@@ -43,3 +43,7 @@ Then(/^I should see an invalid login message$/, async () => {
     expect.stringContaining(FAILED_LOGIN_MESSAGE),
   );
 });
+
+Given(/^I am running a simple test$/, async () => {
+  console.log("Running a simple test");
+});

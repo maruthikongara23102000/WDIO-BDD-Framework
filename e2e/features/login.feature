@@ -11,3 +11,7 @@ Feature: The Internet Guinea Pig Website
     Given I am on the login page
     When I login with foobar and barfoo
     Then I should see an invalid login message
+
+  @GitHubTest
+  Scenario: Sample test to verify github actions
+    Given I am running a simple test
