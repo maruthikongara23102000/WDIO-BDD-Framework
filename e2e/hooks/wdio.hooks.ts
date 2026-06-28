@@ -4,12 +4,21 @@ import { rm } from "node:fs/promises";
 import { ScreenshotHelper } from "../utils/screenshot.helper.js";
 import { FileHelper } from "../utils/file.helper.js";
 import { ReportHelper } from "../utils/report.helper.js";
+import { fileURLToPath } from "node:url";
 
-const reportDir = path.resolve(process.cwd(), "e2e/reports");
-const logsDir = path.resolve(process.cwd(), "e2e/logs");
-const scenariosFilePath = path.resolve(
-  process.cwd(),
-  "e2e/reports/.scenarios.json",
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Project root
+const projectRoot = path.resolve(__dirname, "../..");
+
+const reportDir = path.join(projectRoot, "e2e", "reports");
+const logsDir = path.join(projectRoot, "e2e", "logs");
+const scenariosFilePath = path.join(
+  projectRoot,
+  "e2e",
+  "reports",
+  ".scenarios.json",
 );
 
 type ScenarioExecution = {

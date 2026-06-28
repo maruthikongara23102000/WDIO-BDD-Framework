@@ -56,15 +56,14 @@ jobs:
         shell: bash
 
       - name: Execute Tests
-        working-directory: e2e
         run: |
           if [ -z "${{ github.event.inputs.tag }}" ]; then
             echo "Running all tests..."
             npm run wdio
           else
             echo "Running tests with tag: ${{ github.event.inputs.tag }}"
-            npm run wdio -- --cucumberOpts.tagExpression='${{ github.event.inputs.tag }}'
-          fi
+            npm run wdio -- --cucumberOpts.tagExpression="${{ github.event.inputs.tag }}"
+          fi        \
         shell: bash
 
       - name: Upload Test Reports
@@ -72,7 +71,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
-          path: e2e/reports/
+          path: |
+            e2e/reports/**
           retention-days: 30
           if-no-files-found: warn
 

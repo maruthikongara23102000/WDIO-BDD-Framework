@@ -15,6 +15,7 @@ Your WDIO-BDD-Framework is now fully configured for GitHub Actions CI/CD. The se
 **File Location:** `.github/workflows/run-tests.yml`
 
 **Key Specifications:**
+
 - Trigger type: `workflow_dispatch` (manual)
 - Optional input field: `tag` (Cucumber tag filter)
 - Runner: `ubuntu-latest`
@@ -25,13 +26,13 @@ Your WDIO-BDD-Framework is now fully configured for GitHub Actions CI/CD. The se
 - Timeout: 30 minutes
 
 **Workflow Features:**
+
 ```yaml
 triggers:
   - Manual trigger from GitHub Actions UI
   - Optional tag input (@smoke, @regression, @sanity)
 
-steps:
-  1. Checkout repository code
+steps: 1. Checkout repository code
   2. Setup Node.js 24.11.1 with caching
   3. Install dependencies (npm ci)
   4. Create e2e/.env.local from secrets/variables
@@ -42,6 +43,7 @@ steps:
 ```
 
 **Tag Execution Logic:**
+
 ```bash
 # If tag provided:
 npm run wdio -- --cucumberOpts.tagExpression='@smoke'
@@ -63,8 +65,8 @@ capabilities: [
   {
     browserName: "chrome",
     "goog:chromeOptions": {
-      args: process.env.CI 
-        ? ["--headless", "--no-sandbox", "--disable-dev-shm-usage"] 
+      args: process.env.CI
+        ? ["--headless", "--no-sandbox", "--disable-dev-shm-usage"]
         : [],
     },
   },
@@ -72,6 +74,7 @@ capabilities: [
 ```
 
 **Effects:**
+
 - **Local Development:** `process.env.CI` is undefined → visible browser (unchanged)
 - **GitHub Actions:** `process.env.CI=true` → headless mode with flags
 - **Headless Flags Used:**
@@ -80,6 +83,7 @@ capabilities: [
   - `--disable-dev-shm-usage`: Reduce memory consumption
 
 **Impact:**
+
 - ✅ No changes to `package.json` (uses existing npm scripts)
 - ✅ No changes to step definitions
 - ✅ No changes to page objects
@@ -92,13 +96,14 @@ capabilities: [
 
 #### Source: `e2e/.env.local`
 
-| Variable | Value | Type | Storage | Reason |
-|----------|-------|------|---------|--------|
-| `BASE_URL` | `https://the-internet.herokuapp.com` | Non-sensitive | GitHub Variable | Public test URL |
-| `USERNAME` | `tomsmith` | Non-sensitive | GitHub Variable | Public test user |
-| `PASSWORD` | `SuperSecretPassword!` | Sensitive | GitHub Secret | Contains credentials |
+| Variable   | Value                                | Type          | Storage         | Reason               |
+| ---------- | ------------------------------------ | ------------- | --------------- | -------------------- |
+| `BASE_URL` | `https://the-internet.herokuapp.com` | Non-sensitive | GitHub Variable | Public test URL      |
+| `USERNAME` | `tomsmith`                           | Non-sensitive | GitHub Variable | Public test user     |
+| `PASSWORD` | `SuperSecretPassword!`               | Sensitive     | GitHub Secret   | Contains credentials |
 
 **Workflow Generation Logic:**
+
 ```bash
 cat > e2e/.env.local << EOF
 BASE_URL=${{ vars.BASE_URL }}
@@ -108,6 +113,7 @@ EOF
 ```
 
 **Security Measures:**
+
 - ✅ Secrets never logged in workflow output
 - ✅ Encrypted storage in GitHub
 - ✅ Environment file generated at runtime (not committed)
@@ -119,11 +125,12 @@ EOF
 
 **Required Secrets:** 1
 
-| Secret Name | Value | Scope |
-|---|---|---|
-| `PASSWORD` | `SuperSecretPassword!` | Repository |
+| Secret Name | Value                  | Scope      |
+| ----------- | ---------------------- | ---------- |
+| `PASSWORD`  | `SuperSecretPassword!` | Repository |
 
 **How to Create:**
+
 1. Go to: https://github.com/maruthikongara23102000/WDIO-BDD-Framework/settings/secrets/actions
 2. Click **New repository secret**
 3. **Name:** `PASSWORD`
@@ -131,6 +138,7 @@ EOF
 5. Click **Add secret**
 
 **Verification:**
+
 - Secret will appear as `***` in settings
 - Available to all workflows in repository
 - Never displayed in logs
@@ -142,21 +150,24 @@ EOF
 
 **Required Variables:** 2
 
-| Variable Name | Value | Scope |
-|---|---|---|
-| `BASE_URL` | `https://the-internet.herokuapp.com` | Repository |
-| `USERNAME` | `tomsmith` | Repository |
+| Variable Name | Value                                | Scope      |
+| ------------- | ------------------------------------ | ---------- |
+| `BASE_URL`    | `https://the-internet.herokuapp.com` | Repository |
+| `USERNAME`    | `tomsmith`                           | Repository |
 
 **How to Create:**
+
 1. Go to: https://github.com/maruthikongara23102000/WDIO-BDD-Framework/settings/variables/actions
 2. Click **New repository variable**
 
 **For each variable:**
+
 - **Name:** `BASE_URL` (or `USERNAME`)
 - **Value:** `https://the-internet.herokuapp.com` (or `tomsmith`)
 - Click **Add variable**
 
 **Verification:**
+
 - Variables visible in settings (non-sensitive)
 - Available to all workflows
 - Can be updated anytime
@@ -242,14 +253,15 @@ curl -X POST \
 
 ### Tag Filtering Examples
 
-| Workflow Input | Command Executed | Tests Run | Expected Scenarios |
-|---|---|---|---|
-| (empty) | `npm run wdio` | All tests | 2 (all scenarios) |
-| `@smoke` | `npm run wdio -- --cucumberOpts.tagExpression='@smoke'` | Smoke only | 1 scenario: login successful |
-| `@regression` | `npm run wdio -- --cucumberOpts.tagExpression='@regression'` | Regression only | 1 scenario: invalid login |
-| `@sanity` | `npm run wdio -- --cucumberOpts.tagExpression='@sanity'` | Sanity only | 1 scenario: login successful |
+| Workflow Input | Command Executed                                             | Tests Run       | Expected Scenarios           |
+| -------------- | ------------------------------------------------------------ | --------------- | ---------------------------- |
+| (empty)        | `npm run wdio`                                               | All tests       | 2 (all scenarios)            |
+| `@smoke`       | `npm run wdio -- --cucumberOpts.tagExpression='@smoke'`      | Smoke only      | 1 scenario: login successful |
+| `@regression`  | `npm run wdio -- --cucumberOpts.tagExpression='@regression'` | Regression only | 1 scenario: invalid login    |
+| `@sanity`      | `npm run wdio -- --cucumberOpts.tagExpression='@sanity'`     | Sanity only     | 1 scenario: login successful |
 
 **Feature File Reference:**
+
 ```gherkin
 @smoke @sanity
 Scenario: As a user, I can log into the secure area
@@ -265,6 +277,7 @@ Scenario: As a user, I receive an invalid login message
 ### Uploaded Artifacts
 
 #### 1. Test Reports (`test-reports`)
+
 ```
 e2e/reports/
 ├── latest-report.html        ← Open this in browser
@@ -275,12 +288,14 @@ e2e/reports/
 ```
 
 **Report Contents:**
+
 - Summary cards: Total, Passed, Failed, Skipped, Pending
 - Scenario table: Feature, Scenario, Status, Tags, Duration, Artifacts
 - Timestamp of execution
 - Scenario-wise pass/fail data
 
 #### 2. Screenshots (`screenshots`)
+
 ```
 e2e/screenshots/
 ├── scenario-failure-*.png     ← Captured on test failure
@@ -288,6 +303,7 @@ e2e/screenshots/
 ```
 
 #### 3. Logs (`execution-logs`)
+
 ```
 e2e/logs/
 ├── execution.log              ← Test execution log
@@ -297,6 +313,7 @@ e2e/logs/
 ### Download & View
 
 **Steps:**
+
 1. Go to workflow run page
 2. Scroll to **Artifacts** section
 3. Click **test-reports** → Download
@@ -305,6 +322,7 @@ e2e/logs/
 6. View scenario-wise results with tags and duration
 
 **Retention:**
+
 - Reports: 30 days (configurable)
 - Screenshots: 30 days (configurable)
 - Logs: 30 days (configurable)
@@ -364,15 +382,18 @@ e2e/logs/
 ### Issue: Workflow not visible in Actions tab
 
 **Symptoms:**
+
 - "WDIO BDD Framework - Manual Test Execution" doesn't appear
 - No workflows listed
 
 **Root Causes:**
+
 1. Workflow file not in correct location
 2. File not pushed to main branch
 3. YAML syntax error
 
 **Solutions:**
+
 ```bash
 # Verify file exists and is in main branch
 git log --oneline --all -- .github/workflows/run-tests.yml
@@ -386,6 +407,7 @@ cat run-tests.yml | python -m yaml
 ```
 
 **Actions:**
+
 1. Ensure `.github/workflows/run-tests.yml` is in root directory
 2. Commit and push to main: `git push origin main`
 3. Wait 30 seconds and refresh Actions tab
@@ -396,15 +418,19 @@ cat run-tests.yml | python -m yaml
 ### Issue: Tag input field not showing
 
 **Symptoms:**
+
 - "Run workflow" dialog appears but no tag input field
 
 **Root Causes:**
+
 1. Workflow YAML missing `workflow_dispatch` section
 2. Input definition incorrect
 3. YAML syntax error in inputs section
 
 **Solutions:**
+
 1. Verify YAML has `workflow_dispatch` section:
+
 ```yaml
 on:
   workflow_dispatch:
@@ -423,15 +449,18 @@ on:
 ### Issue: Environment file not created
 
 **Symptoms:**
+
 - Workflow fails on "Create Environment File" step
 - Error: `e2e/.env.local: command not found`
 
 **Root Causes:**
+
 1. Secrets/variables not created in GitHub
 2. Variable names don't match exactly
 3. Shell compatibility issue
 
 **Solutions:**
+
 ```bash
 # Verify secrets exist
 # GitHub UI: Settings → Secrets and variables → Actions
@@ -448,6 +477,7 @@ on:
 ```
 
 **Actions:**
+
 1. Create all missing secrets/variables
 2. Verify exact names match (case-sensitive)
 3. Re-run workflow
@@ -457,16 +487,19 @@ on:
 ### Issue: Tests run but report shows "No scenarios executed"
 
 **Symptoms:**
+
 - Workflow completes successfully
 - Test logs show "6 passing (6.8s)"
 - HTML report shows "0 scenarios"
 
 **Root Causes:**
+
 1. Tag filter syntax error
 2. Tag doesn't match feature file tags
 3. Report generation bug
 
 **Solutions:**
+
 ```bash
 # Check feature file tags
 cat e2e/features/login.feature | grep "@"
@@ -482,6 +515,7 @@ cat e2e/features/login.feature | grep "@"
 ```
 
 **Actions:**
+
 1. Verify tag includes @ symbol: `@smoke` not `smoke`
 2. Check feature file has matching tags
 3. Try running without tag first (all tests)
@@ -492,33 +526,38 @@ cat e2e/features/login.feature | grep "@"
 ### Issue: Chrome fails to start in headless mode
 
 **Symptoms:**
+
 - Workflow fails on "Execute Tests" step
 - Error: `Failed to launch Chrome`
 - Error: `Cannot start Chrome`
 
 **Root Causes:**
+
 1. Missing Chrome dependencies in ubuntu-latest
 2. Sandbox disabled but other flags missing
 3. Chrome path issue
 
 **Solutions:**
 Current configuration includes required flags:
+
 ```typescript
-args: process.env.CI 
-  ? ["--headless", "--no-sandbox", "--disable-dev-shm-usage"] 
+args: process.env.CI
+  ? ["--headless", "--no-sandbox", "--disable-dev-shm-usage"]
   : [],
 ```
 
 **If still failing:**
+
 1. Add additional flags in `wdio.conf.ts`:
+
 ```typescript
 args: [
   "--headless",
   "--no-sandbox",
   "--disable-dev-shm-usage",
   "--disable-gpu",
-  "--single-process"
-]
+  "--single-process",
+];
 ```
 
 2. Check ubuntu-latest has Chrome pre-installed
@@ -529,16 +568,19 @@ args: [
 ### Issue: Artifacts not uploading
 
 **Symptoms:**
+
 - Workflow completes successfully
 - No Artifacts section visible
 - Or: "0 files found"
 
 **Root Causes:**
+
 1. Reports directory empty (test failure)
 2. Path incorrect in upload action
 3. `if: always()` condition not working
 
 **Solutions:**
+
 ```bash
 # Verify reports are generated
 ls -la e2e/reports/
@@ -551,6 +593,7 @@ path: e2e/reports/
 ```
 
 **Actions:**
+
 1. Check test execution logs for errors
 2. Verify reports directory has files
 3. Ensure `if: always()` is in workflow
@@ -561,15 +604,18 @@ path: e2e/reports/
 ### Issue: "Permission denied" when pushing changes
 
 **Symptoms:**
+
 - `git push` fails with authentication error
 - "Permission to maruthikongara23102000/..."
 
 **Root Causes:**
+
 1. GitHub credentials not updated
 2. SSH key not configured
 3. Token expired
 
 **Solutions:**
+
 ```bash
 # Clear credential cache
 git credential-manager erase host=github.com
@@ -587,16 +633,16 @@ git remote set-url origin git@github.com:maruthikongara23102000/WDIO-BDD-Framewo
 
 ### Expected Execution Times
 
-| Phase | Typical Duration |
-|---|---|
-| Checkout | 5 seconds |
-| Setup Node.js | 15 seconds |
-| Install dependencies | 30 seconds |
-| Create environment file | 2 seconds |
-| Display configuration | 2 seconds |
-| Execute tests | 60-90 seconds |
-| Upload artifacts | 10 seconds |
-| **Total** | **~2-3 minutes** |
+| Phase                   | Typical Duration |
+| ----------------------- | ---------------- |
+| Checkout                | 5 seconds        |
+| Setup Node.js           | 15 seconds       |
+| Install dependencies    | 30 seconds       |
+| Create environment file | 2 seconds        |
+| Display configuration   | 2 seconds        |
+| Execute tests           | 60-90 seconds    |
+| Upload artifacts        | 10 seconds       |
+| **Total**               | **~2-3 minutes** |
 
 ### Optimization Tips
 
@@ -673,8 +719,8 @@ To run tests on a schedule (e.g., daily at 2 AM UTC):
 ```yaml
 on:
   schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM UTC
-  workflow_dispatch:     # Also allow manual trigger
+    - cron: "0 2 * * *" # Daily at 2 AM UTC
+  workflow_dispatch: # Also allow manual trigger
     inputs:
       tag:
         description: "Optional tag"
@@ -697,6 +743,7 @@ npm run wdio -- --cucumberOpts.tagExpression='@smoke and @regression'
 ### Custom Reporting (Optional Enhancement)
 
 To generate custom HTML reports, modify `ReportHelper`:
+
 - Add email notifications
 - Add Slack integration
 - Generate PDF reports
@@ -707,17 +754,20 @@ To generate custom HTML reports, modify `ReportHelper`:
 ## 📚 References
 
 ### Official Documentation
+
 - [GitHub Actions Documentation](https://docs.github.com/actions)
 - [Workflow Dispatch](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#ondispatch_workflowworkflow_dispatch)
 - [Artifacts](https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts)
 - [Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
 
 ### WebdriverIO References
+
 - [WDIO Cucumber Framework](https://webdriver.io/docs/cucumber/)
 - [Tag Expressions](https://cucumber.io/docs/cucumber/api/#tags)
 - [Chrome Options](https://chromedriver.chromium.org/capabilities)
 
 ### Node.js
+
 - [Node.js 24.11.1](https://nodejs.org/en/blog/release/v24.11.1/)
 - [npm ci Documentation](https://docs.npmjs.com/cli/v10/commands/npm-ci)
 
@@ -732,7 +782,7 @@ Your GitHub Actions setup is now complete and production-ready. You can:
 ✅ Monitor execution in real-time  
 ✅ Download reports and artifacts  
 ✅ View scenario-wise results  
-✅ Preserve local testing behavior  
+✅ Preserve local testing behavior
 
 **Next Step:** Create the 1 secret and 2 variables in GitHub settings, then trigger your first workflow!
 
