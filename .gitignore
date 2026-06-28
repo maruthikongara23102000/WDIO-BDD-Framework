@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test artifacts
+e2e/reports/
+e2e/screenshots/
+e2e/logs/
+.scenarios.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+out/
+build/
+
+# Logs
+*.log
+npm-debug.log*
