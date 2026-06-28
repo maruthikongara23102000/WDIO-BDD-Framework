@@ -12,7 +12,16 @@ export const config: WebdriverIO.Config = {
   specs: ["./e2e/features/**/*.feature"],
   exclude: [],
   maxInstances: 1,
-  capabilities: [{ browserName: "chrome" }],
+  capabilities: [
+    {
+      browserName: "chrome",
+      "goog:chromeOptions": {
+        args: process.env.CI
+          ? ["--headless", "--no-sandbox", "--disable-dev-shm-usage"]
+          : [],
+      },
+    },
+  ],
   logLevel: "info",
   bail: 0,
   waitforTimeout: 10000,

@@ -1,0 +1,109 @@
+name: WDIO BDD Framework - Manual Test Execution
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Cucumber tag to run (e.g., @smoke, @regression, @sanity). Leave empty to run all tests."
+        required: false
+        default: ""
+        type: string
+
+env:
+  CI: true
+  NODE_VERSION: "24.11.1"
+
+jobs:
+  test-execution:
+    name: Execute WDIO Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Create Environment File
+        run: |
+          cat > e2e/.env.local << EOF
+          BASE_URL=${{ vars.BASE_URL }}
+          USERNAME=${{ vars.USERNAME }}
+          PASSWORD=${{ secrets.PASSWORD }}
+          EOF
+        shell: bash
+
+      - name: Display Test Configuration
+        run: |
+          echo "=== Test Execution Configuration ==="
+          echo "Base URL: ${{ vars.BASE_URL }}"
+          echo "Username: ${{ vars.USERNAME }}"
+          if [ -z "${{ github.event.inputs.tag }}" ]; then
+            echo "Tag Expression: (all tests)"
+          else
+            echo "Tag Expression: ${{ github.event.inputs.tag }}"
+          fi
+          echo "======================================="
+        shell: bash
+
+      - name: Execute Tests
+        working-directory: e2e
+        run: |
+          if [ -z "${{ github.event.inputs.tag }}" ]; then
+            echo "Running all tests..."
+            npm run wdio
+          else
+            echo "Running tests with tag: ${{ github.event.inputs.tag }}"
+            npm run wdio -- --cucumberOpts.tagExpression='${{ github.event.inputs.tag }}'
+          fi
+        shell: bash
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: e2e/reports/
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: e2e/screenshots/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: execution-logs
+          path: e2e/logs/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Test Execution Complete ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifacts Generated" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 Test Reports: Available in 'test-reports' artifact" >> $GITHUB_STEP_SUMMARY
+          echo "- 📸 Screenshots: Available in 'screenshots' artifact (if any failures)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📝 Logs: Available in 'execution-logs' artifact" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### How to Download Reports" >> $GITHUB_STEP_SUMMARY
+          echo "1. Go to the **Artifacts** section of this workflow run" >> $GITHUB_STEP_SUMMARY
+          echo "2. Download **test-reports** artifact" >> $GITHUB_STEP_SUMMARY
+          echo "3. Extract and open **latest-report.html** in your browser" >> $GITHUB_STEP_SUMMARY
